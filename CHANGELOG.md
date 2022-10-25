@@ -83,6 +83,11 @@
 - Data plane's connection to control plane is moved to a privileged worker process
   [#9432](https://github.com/Kong/kong/pull/9432)
 
+#### PDK
+
+- Added support for `kong.client.tls.set_client_ca_list`(`kong.client.tls.setClientCaList`)
+  [#9612](https://github.com/Kong/kong/pull/9612)
+
 ### Fixes
 
 #### Core
