@@ -1,5 +1,7 @@
 local Schema = require "kong.db.schema"
 local cjson  = require "cjson"
+local helpers = require "spec.helpers"
+local kong_global = require "kong.global"
 
 
 local luacov_ok = pcall(require, "luacov")
@@ -3527,6 +3529,95 @@ describe("schema", function()
         local output = Test:process_auto_fields(input, "select")
         input.config.bar = nil
         assert.same(input, output)
+      end)
+    end)
+
+    describe("#referenceable fields", function()
+      before_each(function()
+        _G.kong = kong_global.new()
+        kong_global.init_pdk(_G.kong)
+      end)
+      after_each(function()
+        _G.kong = nil
+      end)
+
+
+      it("dereference array type field", function()
+        helpers.setenv("TEST_SECRET_FOO", "foo")
+        helpers.setenv("TEST_SECRET_BAR", "bar")
+        finally(function()
+          helpers.unsetenv("TEST_SECRET_FOO")
+          helpers.unsetenv("TEST_SECRET_BAR")
+        end)
+
+        local Test = Schema.new({
+          fields = {
+            { secrets = {
+              type = "array",
+              elements = {
+                type = "string",
+                referenceable = true,
+              },
+            } },
+          },
+        })
+
+        local data = Test:process_auto_fields({
+          secrets = {
+            "{vault://env/test_secret_foo}",
+            "{vault://env/test_secret_bar}",
+          },
+        }, "select")
+
+        assert.same({
+          secrets = {
+            "{vault://env/test_secret_foo}",
+            "{vault://env/test_secret_bar}",
+          },
+        }, data["$refs"])
+
+        assert.same({"foo", "bar"}, data.secrets)
+      end)
+
+      it("dereference map type field", function()
+        helpers.setenv("TEST_SECRET_FOO", "foo")
+        helpers.setenv("TEST_SECRET_BAR", "bar")
+        finally(function()
+          helpers.unsetenv("TEST_SECRET_FOO")
+          helpers.unsetenv("TEST_SECRET_BAR")
+        end)
+
+        local Test = Schema.new({
+          fields = {
+            { secret = {
+              type = "map",
+              keys = "string",
+              values = {
+                type = "string",
+                referenceable = true,
+              },
+            } },
+          },
+        })
+
+        local data = Test:process_auto_fields({
+          secret = {
+            foo = "{vault://env/test_secret_foo}",
+            bar = "{vault://env/test_secret_bar}",
+          },
+        }, "select")
+
+        assert.same({
+          secret = {
+            foo = "{vault://env/test_secret_foo}",
+            bar = "{vault://env/test_secret_bar}",
+          },
+        }, data["$refs"])
+
+        assert.same({
+          foo = "foo",
+          bar = "bar",
+        }, data.secret)
       end)
     end)
   end)
