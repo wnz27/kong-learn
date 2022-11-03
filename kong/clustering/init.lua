@@ -13,7 +13,6 @@ local events = require("kong.clustering.events")
 local ngx_log = ngx.log
 local assert = assert
 local sort = table.sort
-local type = type
 
 
 local check_protocol_support = clustering_utils.check_protocol_support
