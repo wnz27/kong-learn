@@ -87,12 +87,17 @@
   [#9253](https://github.com/Kong/kong/pull/9253)
 - Add support for full entity transformations in schemas
   [#9431](https://github.com/Kong/kong/pull/9431)
+- Allow schema `map` type field being marked as referenceable.
+  [#9611](https://github.com/Kong/kong/pull/9611)
 
 #### Plugins
 
 - **Rate-limiting**: The HTTP status code and response body for rate-limited
   requests can now be customized. Thanks, [@utix](https://github.com/utix)!
   [#8930](https://github.com/Kong/kong/pull/8930)
+- **OpenTelemetry**: add referenceable attribute to the `headers` field
+  that could be stored in vaults.
+  [#9611](https://github.com/Kong/kong/pull/9611)
 
 #### Performance
 
