@@ -68,7 +68,7 @@ end
 
 function _M:init_cp_worker(plugins_list)
 
-  events.register_events()
+  events.init_register_events()
 
   self.json_handler:init_worker(plugins_list)
   if not kong.configuration.legacy_hybrid_protocol then
