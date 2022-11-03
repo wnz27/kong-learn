@@ -8,6 +8,7 @@ local declarative = require("kong.db.declarative")
 local utils = require("kong.tools.utils")
 local clustering_utils = require("kong.clustering.utils")
 local constants = require("kong.constants")
+local events = require("kong.clustering.events")
 local string = string
 local setmetatable = setmetatable
 local type = type
@@ -608,14 +609,14 @@ function _M:init_worker(plugins_list)
 
   -- When "clustering", "push_config" worker event is received by a worker,
   -- it loads and pushes the config to its the connected data planes
-  kong.worker_events.register(function(_)
+  events.register_clustering_push_config(function(_)
     if push_config_semaphore:count() <= 0 then
       -- the following line always executes immediately after the `if` check
       -- because `:count` will never yield, end result is that the semaphore
       -- count is guaranteed to not exceed 1
       push_config_semaphore:post()
     end
-  end, "clustering", "push_config")
+  end)
 
   timer_at(0, push_config_loop, self, push_config_semaphore,
                self.conf.db_update_frequency)
